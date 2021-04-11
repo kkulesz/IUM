@@ -14,7 +14,14 @@ def parse_products(df):
     # get rid of rows with strange values
     df = df[(df.price < price_limit) & (df.price > 0)]
 
-    # TODO: przeróbka kategorii, skłaniałbym się do rozbicia ich i wrzucenia do one-hot-encoding
+    # one-got encode category path
+    encoded = df['category_path'].str.split(';')
+    encoded = pd.get_dummies(encoded.apply(pd.Series).stack()).sum(level=0)
+    encoded.columns = encoded.columns.str.replace(' ', '_')
+    encoded.columns = [ 'cat_' + str(col) for col in encoded.columns]
+    df = pd.concat([df, encoded], axis=1)
+
+    df = df.drop(['category_path'], axis=1, inplace=False)
 
     return df
 
@@ -28,39 +35,46 @@ def parse_sessions(df):
     df = df.dropna(subset=['product_id'])
 
     df = df.drop(['purchase_id'], axis=1, inplace=False)
-    print(df.head(20))
+    # print(df.head(20))
     return df
 
 
 def merge_dataframes(users, products, sessions):
-    # session_ids = df['session_id'].unique()
-    '''
-    TODO:
-    1. merge sesji i produktów na product_id
-    2. TODO: dokonczyc todo ;p
+    df = pd.merge(sessions, products, on='product_id', how='inner')
+    # df = pd.merge(df, users, on='user_id', how='inner')
 
-    '''
 
-    # rows = []
-    # for ses_id in session_ids:
-    #     s = df[(df.session_id == ses_id)]
-    #     length = s.timestamp.max() - s.timestamp.min()
-    #     discount = s.offered_discount.unique()[0]
-    #     user_id = s.user_id.unique()[0]
-    #     successful = len(s[s.event_type == 'BUY_PRODUCT']) > 0
-    #     seen = s.product_id.tolist()
-    #     bought = s.loc[
-    #         (s.event_type == 'BUY_PRODUCT'), 'product_id'].tolist()
-    #
-    #     new_session = {'length': length, 'discount': discount,
-    #                    'user_id': user_id, 'successful': successful,
-    #                    'seen': seen, 'bought': bought}
-    #
-    #     rows.append(new_session)
-    #
-    # merged_sessions_df = pd.DataFrame(rows)
-    # print(merged_sessions_df.info())
-    pass
+    session_ids = df['session_id'].unique()
+
+    columns_list = df.columns.tolist()
+    categories_columns = [col for col in columns_list if col.startswith('cat_')]
+
+    rows = []
+    for s_id in session_ids:
+        s = df[(df.session_id == s_id)]
+
+        # process single session rows into one
+        length = s.timestamp.max() - s.timestamp.min()
+        discount = s.offered_discount.unique()[0]
+        user_id = s.user_id.unique()[0]
+        successful = len(s[s.event_type == 'BUY_PRODUCT']) > 0
+        mean_price = s.price.mean()
+
+        # sum one-hot encoded
+        summed_categories = s[categories_columns].sum().to_dict()
+
+        new_session = {'length': length, 'discount': discount,
+                       'user_id': user_id, 'successful': successful,
+                       'mean_price': mean_price}
+
+        new_session.update(summed_categories)
+
+        rows.append(new_session)
+
+    merged_sessions_df = pd.DataFrame(rows)
+    merged_sessions_df = pd.merge(merged_sessions_df, users, on='user_id', how='inner')
+    print(merged_sessions_df.info())
+    return merged_sessions_df
 
 
 def read_and_parse_data():
@@ -72,12 +86,13 @@ def read_and_parse_data():
     products_df = pd.read_json(products_file_path, lines=True)
     sessions_df = pd.read_json(sessions_file_path, lines=True)
 
-    # users_df = parse_users(users_df)
-    # products_df = parse_products(products_df)
-    # sessions_df = parse_sessions(sessions_df)
+    users_df = parse_users(users_df)
+    products_df = parse_products(products_df)
+    sessions_df = parse_sessions(sessions_df)
 
     ready_data = merge_dataframes(users_df, products_df, sessions_df)
-    #TODO: zapisać i korzystać ;)
+
+    ready_data.to_csv('data/merged_data.csv')
 
 if __name__ == '__main__':
     read_and_parse_data()
