@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pandas as pd
 import numpy as np
 
@@ -18,7 +20,7 @@ def parse_products(df):
     encoded = df['category_path'].str.split(';')
     encoded = pd.get_dummies(encoded.apply(pd.Series).stack()).sum(level=0)
     encoded.columns = encoded.columns.str.replace(' ', '_')
-    encoded.columns = [ 'cat_' + str(col) for col in encoded.columns]
+    encoded.columns = ['cat_' + str(col) for col in encoded.columns]
     df = pd.concat([df, encoded], axis=1)
 
     df = df.drop(['category_path'], axis=1, inplace=False)
@@ -41,8 +43,6 @@ def parse_sessions(df):
 
 def merge_dataframes(users, products, sessions):
     df = pd.merge(sessions, products, on='product_id', how='inner')
-    # df = pd.merge(df, users, on='user_id', how='inner')
-
 
     session_ids = df['session_id'].unique()
 
@@ -52,6 +52,18 @@ def merge_dataframes(users, products, sessions):
     rows = []
     for s_id in session_ids:
         s = df[(df.session_id == s_id)]
+        num_of_rows = s.shape[0]
+
+        # skip sessions that includes only 1 event, they do not hold any information
+        if num_of_rows < 2: # TODO:chcemy to robić? jest 2366 takich rekordów, czyli około 1/4 wszystkich danych. Wg mnie powinnośmy
+            continue
+
+        # skip events that took less that 2 seconds, it was probably a missclick
+        s.sort_values('timestamp')
+        for i in range(0, num_of_rows - 1):
+            item_shown_time = s['timestamp'].iloc[i + 1] - s['timestamp'].iloc[i]
+            if abs(item_shown_time) < timedelta(seconds=2):
+                s.drop(index=i)
 
         # process single session rows into one
         length = s.timestamp.max() - s.timestamp.min()
@@ -68,12 +80,11 @@ def merge_dataframes(users, products, sessions):
                        'mean_price': mean_price}
 
         new_session.update(summed_categories)
-
         rows.append(new_session)
 
     merged_sessions_df = pd.DataFrame(rows)
     merged_sessions_df = pd.merge(merged_sessions_df, users, on='user_id', how='inner')
-    print(merged_sessions_df.info())
+
     return merged_sessions_df
 
 
@@ -92,7 +103,8 @@ def read_and_parse_data():
 
     ready_data = merge_dataframes(users_df, products_df, sessions_df)
 
-    ready_data.to_csv('data/merged_data.csv')
+    ready_data.to_csv('data/parsed_data.csv')
+
 
 if __name__ == '__main__':
     read_and_parse_data()
