@@ -41,13 +41,36 @@ def parse_sessions(df):
     return df
 
 
+def increment_counter(user_id, sessions_dict):
+    if user_id in sessions_dict:
+        sessions_dict[user_id] += 1
+    else:
+        sessions_dict[user_id] = 0
+
+
+def get_counter(user_id, sessions_dict):
+    if user_id in sessions_dict:
+        return sessions_dict[user_id]
+    return 0
+
+
+def get_counter_and_increment(user_id, sessions_dict):
+    increment_counter(user_id, sessions_dict)
+    return get_counter(user_id, sessions_dict)
+
+
 def merge_dataframes(users, products, sessions):
     df = pd.merge(sessions, products, on='product_id', how='inner')
 
+    df.sort_values(by=['timestamp'], ascending=True)
     session_ids = df['session_id'].unique()
 
     columns_list = df.columns.tolist()
     categories_columns = [col for col in columns_list if col.startswith('cat_')]
+
+    # for how many sessions of user there were already
+    successful_so_far_dict = {}
+    sessions_so_far_dict = {}
 
     rows = []
     for s_id in session_ids:
@@ -55,8 +78,10 @@ def merge_dataframes(users, products, sessions):
         num_of_rows = s.shape[0]
 
         # skip sessions that includes only 1 event, they do not hold any information
-        if num_of_rows < 2: # TODO:chcemy to robić? jest 2366 takich rekordów, czyli około 1/4 wszystkich danych. Wg mnie powinnośmy
-            continue
+        # TODO:chcemy to robić? jest 2366 takich rekordów, czyli około 1/4 wszystkich danych. Wg mnie powinnośmy
+        # TODO: chociaz, jeżeli chcemy brac wcześniejsze sesje pod uwage to nie powiiniśmy
+        # if num_of_rows < 2:
+        #     continue
 
         # skip events that took less that 2 seconds, it was probably a missclick
         s.sort_values('timestamp')
@@ -70,14 +95,29 @@ def merge_dataframes(users, products, sessions):
         discount = s.offered_discount.unique()[0]
         user_id = s.user_id.unique()[0]
         successful = len(s[s.event_type == 'BUY_PRODUCT']) > 0
-        mean_price = s.price.mean()
+
+        mean_price = round(s.price.mean(), 2)
+
+        min_rating = round(s.rating.min(), 2)
+        max_rating = round(s.rating.max(), 2)
+        mean_rating = round(s.rating.mean(), 2)
+
+        # get user's history so far
+        how_many_so_far = get_counter_and_increment(user_id, sessions_so_far_dict)
+        how_many_successful_so_far = get_counter(user_id, successful_so_far_dict)
+        if successful :
+            increment_counter(user_id, successful_so_far_dict)
 
         # sum one-hot encoded
         summed_categories = s[categories_columns].sum().to_dict()
 
         new_session = {'length': length, 'discount': discount,
                        'user_id': user_id, 'successful': successful,
-                       'mean_price': mean_price}
+                       'mean_price': mean_price, 'min_rating': min_rating,
+                       'max_rating': max_rating, 'mean_rating': mean_rating,
+                       'successful_sessions_so_far': how_many_successful_so_far,
+                       'sessions_so_far': how_many_so_far
+                       }
 
         new_session.update(summed_categories)
         rows.append(new_session)
