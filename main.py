@@ -97,6 +97,7 @@ def merge_dataframes(users, products, sessions):
         successful = len(s[s.event_type == 'BUY_PRODUCT']) > 0
 
         mean_price = round(s.price.mean(), 2)
+        median_of_price = round(s.price.median(), 2)
 
         min_rating = round(s.rating.min(), 2)
         max_rating = round(s.rating.max(), 2)
@@ -113,10 +114,10 @@ def merge_dataframes(users, products, sessions):
 
         new_session = {'length': length, 'discount': discount,
                        'user_id': user_id, 'successful': successful,
-                       'mean_price': mean_price, 'min_rating': min_rating,
-                       'max_rating': max_rating, 'mean_rating': mean_rating,
+                       'mean_price': mean_price, 'median_of_price': median_of_price,
+                       'min_rating': min_rating, 'max_rating': max_rating,
+                       'mean_rating': mean_rating, 'sessions_so_far': how_many_so_far,
                        'successful_sessions_so_far': how_many_successful_so_far,
-                       'sessions_so_far': how_many_so_far
                        }
 
         new_session.update(summed_categories)
@@ -146,5 +147,11 @@ def read_and_parse_data():
     ready_data.to_csv('data/parsed_data.csv')
 
 
+def read_parsed_data():
+    df = pd.read_csv('data/parsed_data.csv')
+    print(df.info())
+
+
 if __name__ == '__main__':
-    read_and_parse_data()
+    # read_and_parse_data()
+    read_parsed_data()
