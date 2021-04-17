@@ -153,5 +153,5 @@ def read_parsed_data():
 
 
 if __name__ == '__main__':
-    # read_and_parse_data()
-    read_parsed_data()
+    read_and_parse_data()
+    # read_parsed_data()
