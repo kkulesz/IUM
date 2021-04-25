@@ -27,5 +27,4 @@ if __name__ == '__main__':
     data['length'] = data['length'].apply(convert_length)
     data['successful'] = data['successful'].apply(encode_boolean)
     data['gender'] = data['gender'].apply(encode_boolean)
-    print(data.info())
-    # data.to_csv('data/data.csv', index=None)
+    data.to_csv('data/data.csv', index=None)
