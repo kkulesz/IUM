@@ -9,10 +9,9 @@ batch_size = 40
 epochs = 10
 
 
-class MatchPredictor(nn.Module):
+class PurchasePredictor(nn.Module):
     def __init__(self):
-        super(MatchPredictor, self).__init__()
-        self.flatten = nn.Flatten()
+        super(PurchasePredictor, self).__init__()
         self.stack = nn.Sequential(
             nn.Linear(38, 32),
             nn.ReLU(),
@@ -86,7 +85,7 @@ if __name__ == '__main__':
     train_dl = get_train_dataloader(tr_data)
     test_dl = get_test_dataloader(te_data)
 
-    network = MatchPredictor()
+    network = PurchasePredictor()
     lf = nn.CrossEntropyLoss()
     opt = torch.optim.SGD(network.parameters(), lr=learning_rate)
 
