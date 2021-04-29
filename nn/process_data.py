@@ -27,8 +27,9 @@ if __name__ == '__main__':
     data['length'] = data['length'].apply(convert_length)
     data['successful'] = data['successful'].apply(encode_boolean)
     data['gender'] = data['gender'].apply(encode_boolean)
-    data.to_csv('data/data.csv', index=None)
+    data.to_csv('data/data_with_user_id.csv', index=None)
 
+    # for data with no categories
     # cols = [c for c in data.columns if c[:3] != 'cat']
     # data = data[cols]
     # data.to_csv('data/data_no_cats.csv', index=None)
