@@ -1,9 +1,8 @@
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from nn.dataset import PurchaseDataset
+from data_utils.dataset import PurchaseDataset
 
-data_csv_file = 'data/data.csv'
 learning_rate = 1e-5
 batch_size = 40
 epochs = 10
@@ -21,20 +20,6 @@ class PurchasePredictor(nn.Module):
 
     def forward(self, x):
         return self.stack(x)
-
-
-def get_training_data():
-    return PurchaseDataset(
-        train=True,
-        data_csv_file=data_csv_file
-    )
-
-
-def get_test_data():
-    return PurchaseDataset(
-        train=False,
-        data_csv_file=data_csv_file
-    )
 
 
 def get_train_dataloader(td):
@@ -80,8 +65,9 @@ def test_loop(dataloader, model, loss_fn):
 
 
 if __name__ == '__main__':
-    tr_data = get_training_data()
-    te_data = get_test_data()
+    tr_data = PurchaseDataset.get_training_data()
+    te_data = PurchaseDataset.get_test_data()
+
     train_dl = get_train_dataloader(tr_data)
     test_dl = get_test_dataloader(te_data)
 

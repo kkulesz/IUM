@@ -2,6 +2,8 @@ import pandas as pd
 import torch
 from torch.utils.data.dataset import Dataset
 
+data_file = '../data_utils/data/data.csv'
+
 
 class PurchaseDataset(Dataset):
     def __init__(self, data_csv_file, train):
@@ -19,3 +21,17 @@ class PurchaseDataset(Dataset):
         stats = torch.tensor(self.data.iloc[idx, self.data.columns != 'successful'].values)
         success = torch.tensor(self.data.iloc[idx]['successful'])
         return {"stats": stats, "success": success}
+
+    @staticmethod
+    def get_training_data():
+        return PurchaseDataset(
+            train=True,
+            data_csv_file=data_file
+        )
+
+    @staticmethod
+    def get_test_data():
+        return PurchaseDataset(
+            train=False,
+            data_csv_file=data_file
+        )
