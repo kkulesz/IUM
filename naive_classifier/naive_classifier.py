@@ -1,15 +1,24 @@
 from sklearn.dummy import DummyClassifier
-from sklearn.metrics import accuracy_score
 import pandas as pd
 
-# https://machinelearningmastery.com/how-to-develop-and-evaluate-naive-classifier-strategies-using-probability/
 
-data = pd.read_csv('../data_utils/data/data.csv')
-y = data['successful']
-X = data.drop(['successful'], axis=1)
+def read_data():
+    col_to_predict = 'successful'
 
-dummy_model = DummyClassifier(strategy='most_frequent')
-dummy_model.fit(X, y)
-dummy_model.predict(X)
-score = dummy_model.score(X, y)
-print(score)
+    data = pd.read_csv('../data_utils/data/data.csv')
+    y = data[col_to_predict]
+    X = data.drop([col_to_predict], axis=1)
+    return X, y
+
+
+def get_dummy_score(X, y):
+    dummy_model = DummyClassifier(strategy='most_frequent')
+    dummy_model.fit(X, y)
+    # dummy_model.predict(X) [0,0,0.....]
+    return dummy_model.score(X, y)
+
+
+if __name__ == '__main__':
+    X, y = read_data()
+    score = get_dummy_score(X, y)
+    print(score)  # 0.768
