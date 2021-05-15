@@ -1,18 +1,15 @@
 import pandas as pd
 import torch
 from torch.utils.data.dataset import Dataset
+from sklearn.model_selection import train_test_split
 
-data_file = '../data_utils/data/data.csv'
+data_file_path = '../data_utils/data/data.csv'
+test_size = 0.2
 
 
 class PurchaseDataset(Dataset):
-    def __init__(self, data_csv_file, train):
-        data = pd.read_csv(data_csv_file)
-        if train is True:
-            self.data = data.iloc[:8000]
-        else:
-            self.data = data.iloc[8000:]
-        self.train = train
+    def __init__(self, data):
+        self.data = data
 
     def __len__(self):
         return len(self.data)
@@ -23,15 +20,10 @@ class PurchaseDataset(Dataset):
         return {"stats": stats, "success": success}
 
     @staticmethod
-    def get_training_data():
-        return PurchaseDataset(
-            train=True,
-            data_csv_file=data_file
-        )
+    def get_test_and_train_datasets():
+        data = pd.read_csv(data_file_path)
+        train_data, test_data = train_test_split(data, test_size=test_size, shuffle=True)
+        train_dataset = PurchaseDataset(train_data)
+        test_dataset = PurchaseDataset(test_data)
 
-    @staticmethod
-    def get_test_data():
-        return PurchaseDataset(
-            train=False,
-            data_csv_file=data_file
-        )
+        return train_dataset, test_dataset
