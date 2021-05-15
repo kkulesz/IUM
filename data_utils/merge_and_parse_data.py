@@ -77,12 +77,6 @@ def merge_dataframes(users, products, sessions):
         s = df[(df.session_id == s_id)]
         num_of_rows = s.shape[0]
 
-        # skip sessions that includes only 1 event, they do not hold any information
-        # TODO:chcemy to robić? jest 2366 takich rekordów, czyli około 1/4 wszystkich danych. Wg mnie powinnośmy
-        # TODO: chociaz, jeżeli chcemy brac wcześniejsze sesje pod uwage to nie powiiniśmy
-        # if num_of_rows < 2:
-        #     continue
-
         # skip events that took less that 2 seconds, it was probably a missclick
         s.sort_values('timestamp')
         for i in range(0, num_of_rows - 1):
@@ -106,18 +100,28 @@ def merge_dataframes(users, products, sessions):
         # get user's history so far
         how_many_so_far = get_counter_and_increment(user_id, sessions_so_far_dict)
         how_many_successful_so_far = get_counter(user_id, successful_so_far_dict)
-        if successful :
+        if successful:
             increment_counter(user_id, successful_so_far_dict)
+        percentage_of_successful = 0
+        if how_many_so_far != 0:
+            percentage_of_successful = round(how_many_successful_so_far / how_many_so_far, 2)
 
         # sum one-hot encoded
         summed_categories = s[categories_columns].sum().to_dict()
 
+        # new_session = {'length': length, 'discount': discount,
+        #                'user_id': user_id, 'successful': successful,
+        #                'mean_price': mean_price, 'median_of_price': median_of_price,
+        #                'min_rating': min_rating, 'max_rating': max_rating,
+        #                'mean_rating': mean_rating, 'sessions_so_far': how_many_so_far,
+        #                'successful_sessions_so_far': how_many_successful_so_far,
+        #                }
         new_session = {'length': length, 'discount': discount,
                        'user_id': user_id, 'successful': successful,
                        'mean_price': mean_price, 'median_of_price': median_of_price,
                        'min_rating': min_rating, 'max_rating': max_rating,
-                       'mean_rating': mean_rating, 'sessions_so_far': how_many_so_far,
-                       'successful_sessions_so_far': how_many_successful_so_far,
+                       'mean_rating': mean_rating,
+                       'percentage_of_successful': percentage_of_successful
                        }
 
         new_session.update(summed_categories)
@@ -143,15 +147,42 @@ def read_and_parse_data():
     sessions_df = parse_sessions(sessions_df)
 
     ready_data = merge_dataframes(users_df, products_df, sessions_df)
+    return ready_data
 
-    ready_data.to_csv('data/parsed_data.csv')
+
+def encode_boolean(b):
+    if b is False:
+        return 0
+    else:
+        return 1
 
 
-def read_parsed_data():
-    df = pd.read_csv('data/parsed_data.csv')
-    print(df.info())
+def convert_length(length):
+    days, time = length.split('days')
+    days = int(days)
+    seconds = days * 86400  # 1 day = 86400 s
+    h, m, s = time.split(':')
+    h, m, s = int(h), int(m), int(s)
+    seconds += h * 3600
+    seconds += m * 60
+    seconds += s
+    return seconds
+
+
+def encode_and_save_data(df):
+    # data.drop(data.columns[[0]], axis=1, inplace=True)
+    df.drop(['user_id', 'city'], axis=1, inplace=True)
+    df['length'] = df['length'].astype(str).apply(convert_length)  # TODO: zmienic to pozniej
+    df['successful'] = df['successful'].apply(encode_boolean)
+    df['gender'] = df['gender'].apply(encode_boolean)
+    df.to_csv('data/data.csv', index=None)
+
+    # for data with no categories
+    cols = [c for c in df.columns if c[:3] != 'cat']
+    df = df[cols]
+    df.to_csv('data/data_no_cats.csv', index=None)
 
 
 if __name__ == '__main__':
-    read_and_parse_data()
-    # read_parsed_data()
+    data = read_and_parse_data()
+    encode_and_save_data(data)
