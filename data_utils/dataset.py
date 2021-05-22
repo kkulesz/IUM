@@ -24,7 +24,6 @@ class PurchaseDataset(Dataset):
 
     @staticmethod
     def get_test_and_train_datasets():
-        print(data_file_path)
         data = pd.read_csv(data_file_path)
         train_data, test_data = train_test_split(data, test_size=test_size, shuffle=True)
         train_dataset = PurchaseDataset(train_data)
