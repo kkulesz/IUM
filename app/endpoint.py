@@ -7,8 +7,8 @@ ab_logic = logic.Logic()
 
 
 @app.route('/predict', methods=['GET'])
-def home():
-    data = request.json
+def get_prediction():
+    data = request.get_json(force=True)
     prediction = ab_logic.handle_predict_request(data)
 
     return f"{{\"prediction\": \"{prediction}\"}}"
@@ -16,8 +16,9 @@ def home():
 
 @app.route('/session_result', methods=['POST'])
 def log_result():
-    data = request.json
+    data = request.get_json(force=True)
     ab_logic.handle_logging_result(data)
+
     return "202 OK ;)"
 
 

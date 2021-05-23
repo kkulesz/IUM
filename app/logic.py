@@ -29,10 +29,8 @@ class Logic:
         group = "A" if user_id % 2 == 0 else "B"
 
         if group == "A":
-            print("dummy")
             prediction = self.__dummy_predict(json_input)
         else:
-            print("correct")
             prediction = self.__correct_predict(json_input)
 
         self.__log_prediction(group, session_id, prediction)
@@ -41,7 +39,7 @@ class Logic:
 
     def handle_logging_result(self, json_input):
         session_id = json_input['session_id']
-        result = json_input['result']
+        result = json_input['successful']
         self.__log_end_of_session_result(session_id, result)
 
     def __dummy_predict(self, inputs):
@@ -51,9 +49,7 @@ class Logic:
         return self.__correct_model.predict_no_grad(inputs)
 
     def __log_prediction(self, model, session_id, prediction):
-        log_msg = f"Prediction: {model}, {session_id}, {prediction}"
-        print(log_msg)
-        logging.info(log_msg)
+        logging.info(f"Prediction: {model}, {session_id}, {prediction}")
 
     def __log_end_of_session_result(self, session_id, result):
         logging.info(f"Result: {session_id}, {result}")
