@@ -1,4 +1,5 @@
 import pandas as pd
+import logging
 from nn.model import get_model
 from naive_classifier.naive_classifier import NaiveClassifier
 
@@ -9,6 +10,8 @@ class Logic:
         data_to_initialize = pd.read_csv('../data_utils/data/data_no_cats.csv')
         y = data_to_initialize[y_column]
         X = data_to_initialize.drop([y_column], axis=1)
+
+        logging.basicConfig(filename='ab_events.log', level=logging.DEBUG)
 
         self.__dummy_model = NaiveClassifier(X, y)
         self.__correct_model = get_model(X.shape[1])
@@ -23,8 +26,9 @@ class Logic:
         json_input.pop(user_id_col)
         json_input.pop(session_id_col)
 
-        group = user_id % 2 == 0
-        if group:
+        group = "A" if user_id % 2 == 0 else "B"
+
+        if group == "A":
             print("dummy")
             prediction = self.__dummy_predict(json_input)
         else:
@@ -47,7 +51,9 @@ class Logic:
         return self.__correct_model.predict_no_grad(inputs)
 
     def __log_prediction(self, model, session_id, prediction):
-        pass
+        log_msg = f"Prediction: {model}, {session_id}, {prediction}"
+        print(log_msg)
+        logging.info(log_msg)
 
     def __log_end_of_session_result(self, session_id, result):
-        pass
+        logging.info(f"Result: {session_id}, {result}")

@@ -9,7 +9,6 @@ ab_logic = logic.Logic()
 @app.route('/predict', methods=['GET'])
 def home():
     data = request.json
-    # print("dane_wejsciowe:\n" + str(data))
     prediction = ab_logic.handle_predict_request(data)
 
     return f"{{\"prediction\": \"{prediction}\"}}"
