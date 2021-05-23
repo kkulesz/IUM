@@ -6,12 +6,12 @@ from naive_classifier.naive_classifier import NaiveClassifier
 
 class Logic:
     def __init__(self):
+        logging.basicConfig(filename='ab_events.log', level=logging.DEBUG)
+
         y_column = 'successful'
         data_to_initialize = pd.read_csv('../data_utils/data/data_no_cats.csv')
         y = data_to_initialize[y_column]
         X = data_to_initialize.drop([y_column], axis=1)
-
-        logging.basicConfig(filename='ab_events.log', level=logging.DEBUG)
 
         self.__dummy_model = NaiveClassifier(X, y)
         self.__correct_model = get_model(X.shape[1])
