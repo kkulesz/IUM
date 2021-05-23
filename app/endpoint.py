@@ -12,10 +12,14 @@ def home():
     # print("dane_wejsciowe:\n" + str(data))
     prediction = ab_logic.handle_predict_request(data)
 
-    # xD mnie smieszy
-    return "{\n\t " \
-           "\"prediction\": \"" + str(prediction) + \
-           "\"\n}"
+    return f"{{\"prediction\": \"{prediction}\"}}"
+
+
+@app.route('/session_result', methods=['POST'])
+def log_result():
+    data = request.json
+    ab_logic.handle_logging_result(data)
+    return "202 OK ;)"
 
 
 if __name__ == '__main__':

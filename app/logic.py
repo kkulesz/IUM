@@ -15,28 +15,39 @@ class Logic:
 
     def handle_predict_request(self, json_input):
         user_id_col = 'user_id'
-        # TODO: pewnie trzeba jeszcze session_id i dodac nowy endpoint,
-        #  ktory zapisze nam czy sesja zostala zakonczona sukcesem, zeby potem sprawdzic czy sie udalo
+        session_id_col = 'session_id'
+
         user_id = json_input[user_id_col]
+        session_id = json_input[session_id_col]
+
         json_input.pop(user_id_col)
+        json_input.pop(session_id_col)
 
         group = user_id % 2 == 0
         if group:
             print("dummy")
-            prediction = self.dummy_predict(json_input)
+            prediction = self.__dummy_predict(json_input)
         else:
             print("correct")
-            prediction = self.correct_predict(json_input)
+            prediction = self.__correct_predict(json_input)
 
-        self.log(group, json_input, prediction)
+        self.__log_prediction(group, session_id, prediction)
 
         return prediction
 
-    def dummy_predict(self, input):
-        return self.__dummy_model.dummy_predict(input)
+    def handle_logging_result(self, json_input):
+        session_id = json_input['session_id']
+        result = json_input['result']
+        self.__log_end_of_session_result(session_id, result)
 
-    def correct_predict(self, input):
-        return self.__correct_model.predict_no_grad(input)
+    def __dummy_predict(self, inputs):
+        return self.__dummy_model.dummy_predict(inputs)
 
-    def log(self, model, input, prediction):
+    def __correct_predict(self, inputs):
+        return self.__correct_model.predict_no_grad(inputs)
+
+    def __log_prediction(self, model, session_id, prediction):
+        pass
+
+    def __log_end_of_session_result(self, session_id, result):
         pass
