@@ -30,7 +30,7 @@ if __name__ == "__main__":
         requests.post(app_url + '/session_result', json=json_to_log_result)
 
         if row_index % 1000 == 0:
-            print(row_index)
+            print(f"[{row_index:4.0f}/{no_of_rows}]")
 
         user_id += 1
         session_id += 1

@@ -64,5 +64,5 @@ if __name__ == "__main__":
     pred_dict, res_dict = read_data_from_log_file()
     proc_of_A, proc_of_B = count_successful_predictions(pred_dict, res_dict)
 
-    print("Wynik A: " + str(proc_of_A) + "%")
-    print("Wynik B: " + str(proc_of_B) + "%")
+    print("Naive A: " + str(proc_of_A) + "%")
+    print("Our   B: " + str(proc_of_B) + "%")

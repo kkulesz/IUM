@@ -16,7 +16,7 @@ class NaiveClassifier:
 
 
 def read_data():
-    data = pd.read_csv('../data_utils/data/data.csv')
+    data = pd.read_csv('../data_utils/data/data_no_cats.csv')
     col_to_predict = 'successful'
 
     y = data[col_to_predict]

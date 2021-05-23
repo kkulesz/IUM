@@ -7,9 +7,7 @@ class PurchasePredictor(nn.Module):
     def __init__(self, input_size):
         super(PurchasePredictor, self).__init__()
 
-        hidden_layer_size = int(input_size / 4)  # TODO: tu tez bardziej pomyslec
-        # print("input_size = " + str(input_size))
-        # print("hidden_layer_size = " + str(hidden_layer_size))
+        hidden_layer_size = int(input_size / 2)
 
         self.linear1 = nn.Linear(input_size, hidden_layer_size)
         self.relu = nn.ReLU()

@@ -19,7 +19,7 @@ def log_result():
     data = request.get_json(force=True)
     ab_logic.handle_logging_result(data)
 
-    return "202 OK ;)"
+    return f"{{ \"response\": \"202 OK ;-)\" }}"
 
 
 if __name__ == '__main__':

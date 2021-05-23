@@ -16,7 +16,7 @@ def parse_products(df):
     # get rid of rows with strange values
     df = df[(df.price < price_limit) & (df.price > 0)]
 
-    # one-got encode category path
+    # one-hot encode category path
     encoded = df['category_path'].str.split(';')
     encoded = pd.get_dummies(encoded.apply(pd.Series).stack()).sum(level=0)
     encoded.columns = encoded.columns.str.replace(' ', '_')
@@ -37,7 +37,7 @@ def parse_sessions(df):
     df = df.dropna(subset=['product_id'])
 
     df = df.drop(['purchase_id'], axis=1, inplace=False)
-    # print(df.head(20))
+
     return df
 
 
@@ -170,9 +170,8 @@ def convert_length(length):
 
 
 def encode_and_save_data(df):
-    # data.drop(data.columns[[0]], axis=1, inplace=True)
     df.drop(['user_id', 'city'], axis=1, inplace=True)
-    df['length'] = df['length'].astype(str).apply(convert_length)  # TODO: zmienic to pozniej
+    df['length'] = df['length'].astype(str).apply(convert_length)
     df['successful'] = df['successful'].apply(encode_boolean)
     df['gender'] = df['gender'].apply(encode_boolean)
     df.to_csv('data/data.csv', index=None)

@@ -4,8 +4,6 @@ from torch.utils.data import DataLoader
 from data_utils.dataset import PurchaseDataset
 from nn.model import PurchasePredictor
 
-# no_cats; le=5e5, batch=10 => max 79.27
-# z catsami tez najlepiej 5e5
 learning_rate = 1e-5
 batch_size = 10
 epochs = 30
@@ -23,7 +21,7 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         X = sample['features']
         y = sample['success']
         prediction = model(X)
-        prediction = torch.reshape(prediction, (-1,))  # TODO: pozbyc sie tego pozniej
+        prediction = torch.reshape(prediction, (-1,))
 
         loss = loss_fn(prediction, y)
         loss.backward()
