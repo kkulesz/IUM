@@ -7,6 +7,9 @@ import numpy as np
 def parse_users(df):
     # Women - True ; Men - False
     df['gender'] = np.where(df['name'].str.split(' ').str[0].str[-1] == 'a', True, False)
+    cities = df['city']
+    encoded_cities = pd.get_dummies(cities.apply(pd.Series).stack()).sum(level=0)
+    df = pd.concat([df, encoded_cities], axis=1)
 
     return df.drop(['name', 'street'], axis=1, inplace=False)
 
@@ -170,7 +173,7 @@ def convert_length(length):
 
 
 def encode_and_save_data(df):
-    df.drop(['user_id', 'city'], axis=1, inplace=True)
+    df.drop(['city'], axis=1, inplace=True) #TODO: user_id_zostawic/wywalic
     df['length'] = df['length'].astype(str).apply(convert_length)
     df['successful'] = df['successful'].apply(encode_boolean)
     df['gender'] = df['gender'].apply(encode_boolean)

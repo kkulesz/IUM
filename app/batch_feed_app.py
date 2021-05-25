@@ -11,11 +11,11 @@ if __name__ == "__main__":
     data = pd.read_csv('../data_utils/data/data_no_cats.csv')
     no_of_rows = data.shape[0]
 
-    user_id = 100
+    # user_id = 100
     session_id = 5000
     for row_index in range(0, no_of_rows):
         prediction_data = data.loc[row_index, data.columns != 'successful']
-        prediction_data['user_id'] = user_id
+        # prediction_data['user_id'] = user_id
         prediction_data['session_id'] = session_id
 
         result_data = data.loc[row_index, data.columns == 'successful']
@@ -32,6 +32,6 @@ if __name__ == "__main__":
         if row_index % 1000 == 0:
             print(f"[{row_index:4.0f}/{no_of_rows}]")
 
-        user_id += 1
+        # user_id += 1
         session_id += 1
 

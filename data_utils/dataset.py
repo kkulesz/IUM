@@ -8,7 +8,7 @@ test_size = 0.2
 
 class PurchaseDataset(Dataset):
     def __init__(self, data):
-        self.data = data
+        self.data = data.drop(['user_id'], axis=1)
 
     def __len__(self):
         return len(self.data)

@@ -9,9 +9,10 @@ class Logic:
         logging.basicConfig(filename='ab_events.log', level=logging.DEBUG)
 
         y_column = 'successful'
+        user_id_column = 'user_id'
         data_to_initialize = pd.read_csv('../data_utils/data/data_no_cats.csv')
         y = data_to_initialize[y_column]
-        X = data_to_initialize.drop([y_column], axis=1)
+        X = data_to_initialize.drop([y_column, user_id_column], axis=1)
 
         self.__dummy_model = NaiveClassifier(X, y)
         self.__correct_model = get_model(X.shape[1])
