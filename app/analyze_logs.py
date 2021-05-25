@@ -40,6 +40,7 @@ def count_successful_predictions(pred_dict, res_dict):
     sum_of_correct_for_B = 0
     sum_of_all_A = 0
     sum_of_all_B = 0
+    no_of_false_possitive_for_our_model = 0
 
     session_ids = pred_dict.keys()
     for ses_id in session_ids:
@@ -54,15 +55,18 @@ def count_successful_predictions(pred_dict, res_dict):
             sum_of_all_B += 1
             if is_correct:
                 sum_of_correct_for_B += 1
+            if pred_dict[ses_id][1] == 'True' and res_dict[ses_id] == 'False':
+                no_of_false_possitive_for_our_model += 1
 
     proc_of_A = round((sum_of_correct_for_A/sum_of_all_A) * 100, 2)
     proc_of_B = round((sum_of_correct_for_B/sum_of_all_B) * 100, 2)
-    return proc_of_A, proc_of_B
+    return (proc_of_A, sum_of_all_A), (proc_of_B, sum_of_all_B, no_of_false_possitive_for_our_model)
 
 
 if __name__ == "__main__":
     pred_dict, res_dict = read_data_from_log_file()
-    proc_of_A, proc_of_B = count_successful_predictions(pred_dict, res_dict)
+    (proc_of_A, sum_of_all_A), (proc_of_B, sum_of_all_B, false_positives) = count_successful_predictions(pred_dict, res_dict)
 
-    print("Naive A: " + str(proc_of_A) + "%")
-    print("Our   B: " + str(proc_of_B) + "%")
+    print(f"""Naive A: skuteczność={proc_of_A:.2f}% dla {sum_of_all_A} rekordów""")
+    print(f"""Our   B: skuteczność={proc_of_B:.2f}% dla {sum_of_all_B} rekordów
+    z czego liczba błędów false-positive={false_positives}""")

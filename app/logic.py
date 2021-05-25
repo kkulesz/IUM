@@ -26,7 +26,7 @@ class Logic:
         json_input.pop(user_id_col)
         json_input.pop(session_id_col)
 
-        group = "A" if user_id % 2 == 0 else "B"
+        group = "B" if user_id % 2 == 0 else "A"
 
         if group == "A":
             prediction = self.__dummy_predict(json_input)

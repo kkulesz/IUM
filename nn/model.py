@@ -9,15 +9,15 @@ class PurchasePredictor(nn.Module):
 
         hidden_layer_size = int(input_size / 2)
 
-        self.linear1 = nn.Linear(input_size, hidden_layer_size)
+        self.linear1 = nn.Linear(input_size, 1)
         self.relu = nn.ReLU()
-        self.linear2 = nn.Linear(hidden_layer_size, 1)
+        # self.linear2 = nn.Linear(hidden_layer_size, 1)
 
     def forward(self, x):
         out = self.linear1(x)
         out2 = self.relu(out)
-        out3 = self.linear2(out2)
-        return torch.sigmoid(out3)  # Sigmoid zamiast Softmaxa jest do binarnej klasyfikacji
+        # out3 = self.linear2(out2)
+        return torch.sigmoid(out2)  # Sigmoid zamiast Softmaxa jest do binarnej klasyfikacji
 
     def predict_no_grad(self, input):  # to pewnie jest bloat i jest juz zaimplementowane, ale zmeczony jestem
         with torch.no_grad():
